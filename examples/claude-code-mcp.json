@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "xobni-email": {
+      "type": "url",
+      "url": "https://api.xobni.ai/mcp/",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}

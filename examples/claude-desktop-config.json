@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "xobni-email": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://api.xobni.ai/mcp/",
+        "--header",
+        "Authorization: Bearer YOUR_API_KEY"
+      ]
+    }
+  }
+}
