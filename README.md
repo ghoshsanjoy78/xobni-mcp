@@ -1,13 +1,7 @@
 <p align="center">
   <a href="https://xobni.ai">
-    <img src="https://www.xobni.ai/xobni-logo.svg" alt="Xobni" width="200" />
+    <img src="./logo.png" alt="Xobni — Give your AI agent a digital identity" width="100%" />
   </a>
-</p>
-
-<h3 align="center">Give Your AI Agent a Digital Identity</h3>
-
-<p align="center">
-  Email, calendar, storage, and semantic search — one API key.
 </p>
 
 <p align="center">
