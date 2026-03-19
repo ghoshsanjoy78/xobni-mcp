@@ -44,9 +44,9 @@ async def main():
 
             # Send an email
             result = await session.call_tool("send_email", {
-                "to": "recipient@example.com",
+                "to": ["recipient@example.com"],
                 "subject": "Hello from my AI agent",
-                "body": "This email was sent by an AI agent using Xobni.",
+                "body_text": "This email was sent by an AI agent using Xobni.",
             })
             print(f"\nSend result: {result.content[0].text}")
 
@@ -55,6 +55,43 @@ async def main():
                 "query": "meeting notes from last week",
             })
             print(f"\nSearch results: {result.content[0].text}")
+
+            # Calendar: create an event
+            result = await session.call_tool("create_calendar_event", {
+                "title": "Team Standup",
+                "start_time": "2026-03-20T10:00:00",
+                "end_time": "2026-03-20T10:30:00",
+                "timezone": "America/New_York",
+                "recurrence_rule": "FREQ=WEEKLY;BYDAY=MO,WE,FR",
+            })
+            print(f"\nCreated event: {result.content[0].text}")
+
+            # Calendar: list events
+            result = await session.call_tool("list_calendar_events", {"limit": 5})
+            print(f"\nCalendar events: {result.content[0].text}")
+
+            # Storage: store a document
+            result = await session.call_tool("store_document", {
+                "collection": "notes",
+                "data": {"title": "Meeting Notes", "content": "Discussed Q2 roadmap..."},
+                "metadata": {"type": "meeting"},
+            })
+            print(f"\nStored document: {result.content[0].text}")
+
+            # Storage: RAG query
+            result = await session.call_tool("ask_storage", {
+                "question": "What was discussed about the roadmap?",
+            })
+            print(f"\nRAG answer: {result.content[0].text}")
+
+            # Schedule an email
+            result = await session.call_tool("schedule_email", {
+                "send_at": "2026-03-20T09:00:00Z",
+                "to": ["recipient@example.com"],
+                "subject": "Reminder",
+                "body_text": "Don't forget the meeting today!",
+            })
+            print(f"\nScheduled email: {result.content[0].text}")
 
 
 if __name__ == "__main__":

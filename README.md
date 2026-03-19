@@ -4,10 +4,10 @@
   </a>
 </p>
 
-<h3 align="center">Email Infrastructure for AI Agents</h3>
+<h3 align="center">Give Your AI Agent a Digital Identity</h3>
 
 <p align="center">
-  Give your AI agent a real email address with full inbox management, semantic search, document storage, and calendar — accessible via MCP or REST API.
+  Email, calendar, storage, and semantic search — one API key.
 </p>
 
 <p align="center">
@@ -22,14 +22,14 @@
 
 ## What is Xobni?
 
-Xobni gives AI agents their own `@xobni.ai` email address with a full-featured email platform behind it:
+Xobni gives AI agents their own `@xobni.ai` email address with a full productivity platform behind it:
 
 - **Send & receive email** with attachments (PDF, DOCX, XLSX, PPTX)
-- **Semantic search** across email bodies and document content
-- **Document storage** with RAG (retrieval-augmented generation)
-- **Calendar** with event management and natural language search
-- **Webhooks** for real-time notifications (email.received, email.sent)
-- **Trusted senders** for spam control
+- **Calendar** with recurring events, attendees, timezones, and natural language search
+- **Document storage** with collections, metadata filtering, and RAG (retrieval-augmented generation)
+- **Semantic search** across emails, documents, and calendar events
+- **Webhooks** for real-time notifications (6 event types)
+- **Trusted senders** for inbox security
 - **Scheduled emails** with calendar integration
 
 All accessible via **MCP protocol** or **REST API**, with agent-scoped API keys for security.
@@ -46,6 +46,26 @@ Go to your agent's settings and create an API key. Keys are scoped to a single a
 
 ### 3. Connect via MCP
 
+#### Claude Code
+
+Add to your MCP settings (`.mcp.json` or via `claude mcp add`):
+
+```json
+{
+  "mcpServers": {
+    "xobni": {
+      "type": "url",
+      "url": "https://api.xobni.ai/mcp/",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+Or install the [Claude Code Plugin](#claude-code-plugin) for one-command setup.
+
 #### Claude Desktop
 
 Add to your `claude_desktop_config.json`:
@@ -53,7 +73,7 @@ Add to your `claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "xobni-email": {
+    "xobni": {
       "command": "npx",
       "args": [
         "-y",
@@ -67,24 +87,6 @@ Add to your `claude_desktop_config.json`:
 }
 ```
 
-#### Claude Code
-
-Add to your MCP settings (`.mcp.json` or via `claude mcp add`):
-
-```json
-{
-  "mcpServers": {
-    "xobni-email": {
-      "type": "url",
-      "url": "https://api.xobni.ai/mcp/",
-      "headers": {
-        "Authorization": "Bearer YOUR_API_KEY"
-      }
-    }
-  }
-}
-```
-
 #### Cursor / Windsurf / Other MCP Clients
 
 Use the streamable HTTP transport:
@@ -92,7 +94,7 @@ Use the streamable HTTP transport:
 - **URL:** `https://api.xobni.ai/mcp/`
 - **Header:** `Authorization: Bearer YOUR_API_KEY`
 
-## MCP Tools (33)
+## MCP Tools (34)
 
 ### Email (10 tools)
 
@@ -108,6 +110,33 @@ Use the streamable HTTP transport:
 | `mark_email` | Update email status (read/unread/archived) or starred flag |
 | `search_emails` | Semantic search across email bodies and extracted document text |
 | `get_attachment_text` | Get extracted text from processed document attachments |
+
+### Trusted Senders (3 tools)
+
+| Tool | Description |
+|------|-------------|
+| `list_trusted_senders` | List allowed senders (agent owner is always trusted) |
+| `add_trusted_sender` | Add an email to the trusted senders list |
+| `remove_trusted_sender` | Remove a trusted sender |
+
+### Scheduled Emails (3 tools)
+
+| Tool | Description |
+|------|-------------|
+| `schedule_email` | Schedule an email for future delivery, optional calendar event link |
+| `list_scheduled_emails` | List scheduled emails with status filter |
+| `cancel_scheduled_email` | Cancel a pending scheduled email |
+
+### Calendar (6 tools)
+
+| Tool | Description |
+|------|-------------|
+| `list_calendar_events` | List events with date and status filters |
+| `create_calendar_event` | Create event with timezone, recurrence, attendees, and metadata |
+| `get_calendar_event` | Get a calendar event by ID |
+| `update_calendar_event` | Update event fields |
+| `delete_calendar_event` | Delete an event |
+| `search_calendar` | Search events by natural language |
 
 ### Storage & RAG (8 tools)
 
@@ -127,36 +156,11 @@ Use the streamable HTTP transport:
 | Tool | Description |
 |------|-------------|
 | `list_webhooks` | List webhooks with URL, events, and status |
-| `create_webhook` | Create a webhook for `email.received` / `email.sent` events |
+| `create_webhook` | Create a webhook with event subscriptions (returns signing secret) |
 | `delete_webhook` | Delete a webhook by ID |
 | `list_webhook_deliveries` | List delivery attempts with status codes and timestamps |
 
-### Trusted Senders (3 tools)
-
-| Tool | Description |
-|------|-------------|
-| `list_trusted_senders` | List allowed senders (agent owner is always trusted) |
-| `add_trusted_sender` | Add an email to the trusted senders list |
-| `remove_trusted_sender` | Remove a trusted sender |
-
-### Calendar (6 tools)
-
-| Tool | Description |
-|------|-------------|
-| `list_calendar_events` | List events with date and status filters |
-| `create_calendar_event` | Create event with timezone, recurrence, attendees, and metadata |
-| `get_calendar_event` | Get a calendar event by ID |
-| `update_calendar_event` | Update event fields |
-| `delete_calendar_event` | Delete an event |
-| `search_calendar` | Search events by natural language |
-
-### Scheduled Emails (3 tools)
-
-| Tool | Description |
-|------|-------------|
-| `schedule_email` | Schedule an email for future delivery, optional calendar event link |
-| `list_scheduled_emails` | List scheduled emails with status filter |
-| `cancel_scheduled_email` | Cancel a pending scheduled email |
+**Webhook events:** `email.received`, `email.sent`, `calendar.event_reminder`, `scheduled_email.sent`, `scheduled_email.failed`, `document.created`
 
 ## REST API
 
@@ -176,20 +180,39 @@ PATCH  /emails/{id}                         Update email status
 GET    /emails/threads/{id}                 Get thread
 POST   /search                              Semantic search
 GET    /agents                              List agents
+GET    /calendar/events                     List calendar events
+POST   /calendar/events                     Create calendar event
+GET    /calendar/events/{id}                Get calendar event
+PATCH  /calendar/events/{id}                Update calendar event
+DELETE /calendar/events/{id}                Delete calendar event
+POST   /calendar/events/search              Search calendar
+GET    /calendar/scheduled-emails           List scheduled emails
+POST   /calendar/scheduled-emails           Schedule an email
+DELETE /calendar/scheduled-emails/{id}      Cancel scheduled email
 POST   /store/{collection}/documents        Store document
+GET    /store/{collection}/documents        List documents
 POST   /store/search                        Search storage
 POST   /store/ask                           RAG query
 GET    /event-hooks                         List webhooks
 POST   /event-hooks                         Create webhook
+GET    /event-hooks/{id}/deliveries         List deliveries
 GET    /trusted-senders                     List trusted senders
 POST   /trusted-senders                     Add trusted sender
+DELETE /trusted-senders/{id}                Remove trusted sender
 ```
 
-## Claude Skill
+## Claude Code Plugin
 
-Xobni is also available as a [Claude Skill](https://www.xobni.ai/docs/claude-skill) for use with Claude.ai, Claude Code, and the Agent SDK.
+Xobni is available as a [Claude Code plugin](https://www.xobni.ai/docs/claude-skill) with 4 skills, 2 commands, and an inbox-manager agent.
 
-Download: [xobni.zip](https://www.xobni.ai/xobni.zip)
+Install from a marketplace:
+
+```
+/plugin marketplace add ghoshsanjoy78/xobni-claude-plugin
+/plugin install xobni@xobni-marketplace
+```
+
+Or download the [Claude Skill](https://www.xobni.ai/xobni.zip) for use with Claude.ai and the Agent SDK.
 
 ## Examples
 

@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "xobni-email": {
+    "xobni": {
       "type": "url",
       "url": "https://api.xobni.ai/mcp/",
       "headers": {

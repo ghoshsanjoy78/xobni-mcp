@@ -69,6 +69,56 @@ curl -s -X POST "$BASE_URL/search" \
 echo "=== Get Thread ==="
 curl -s -H "$AUTH" "$BASE_URL/emails/threads/THREAD_ID" | jq .
 
+# ─── Calendar ─────────────────────────────────────────────────
+
+echo "=== List Calendar Events ==="
+curl -s -H "$AUTH" "$BASE_URL/calendar/events?limit=10" | jq .
+
+echo "=== Create Calendar Event ==="
+curl -s -X POST "$BASE_URL/calendar/events" \
+  -H "$AUTH" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Team Standup",
+    "start_time": "2026-03-20T10:00:00",
+    "end_time": "2026-03-20T10:30:00",
+    "timezone": "America/New_York",
+    "recurrence_rule": "FREQ=WEEKLY;BYDAY=MO,WE,FR",
+    "attendees": [
+      {"email": "alice@example.com", "name": "Alice"},
+      {"email": "bob@example.com", "name": "Bob"}
+    ]
+  }' | jq .
+
+echo "=== Search Calendar ==="
+curl -s -X POST "$BASE_URL/calendar/events/search" \
+  -H "$AUTH" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "standup meeting",
+    "limit": 5
+  }' | jq .
+
+# ─── Scheduled Emails ────────────────────────────────────────
+
+echo "=== Schedule Email ==="
+curl -s -X POST "$BASE_URL/calendar/scheduled-emails" \
+  -H "$AUTH" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "send_at": "2026-03-20T09:00:00Z",
+    "send_request": {
+      "to": ["recipient@example.com"],
+      "subject": "Reminder",
+      "body_text": "Don't forget the meeting today!",
+      "cc": [],
+      "bcc": []
+    }
+  }' | jq .
+
+echo "=== List Scheduled Emails ==="
+curl -s -H "$AUTH" "$BASE_URL/calendar/scheduled-emails?status=pending" | jq .
+
 # ─── Webhooks ─────────────────────────────────────────────────
 
 echo "=== Create Webhook ==="
@@ -77,7 +127,7 @@ curl -s -X POST "$BASE_URL/event-hooks" \
   -H "Content-Type: application/json" \
   -d '{
     "url": "https://your-server.com/webhook",
-    "events": ["email.received", "email.sent"]
+    "events": ["email.received", "email.sent", "calendar.event_reminder", "scheduled_email.sent", "scheduled_email.failed", "document.created"]
   }' | jq .
 
 echo "=== List Webhooks ==="

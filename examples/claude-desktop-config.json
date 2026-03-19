@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "xobni-email": {
+    "xobni": {
       "command": "npx",
       "args": [
         "-y",

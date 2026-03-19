@@ -1,7 +1,13 @@
 /**
- * Example: Webhook receiver for Xobni email events.
+ * Example: Webhook receiver for Xobni events.
  *
- * Verifies HMAC-SHA256 signatures and processes email.received / email.sent events.
+ * Verifies HMAC-SHA256 signatures and processes webhook events.
+ *
+ * Supported events:
+ *   - email.received, email.sent
+ *   - calendar.event_reminder
+ *   - scheduled_email.sent, scheduled_email.failed
+ *   - document.created
  *
  * Prerequisites:
  *   npm install express
@@ -44,14 +50,39 @@ app.post("/webhook", (req, res) => {
     return res.status(401).json({ error: "Timestamp too old" });
   }
 
-  const { event, email, agent_id } = req.body;
-
+  const { event, agent_id } = req.body;
   console.log(`Received ${event} for agent ${agent_id}`);
-  console.log(`  From: ${email.from_address}`);
-  console.log(`  Subject: ${email.subject}`);
-  console.log(`  Snippet: ${email.snippet}`);
-  console.log(`  Trusted: ${email.is_trusted_sender}`);
-  console.log(`  Attachments: ${email.attachment_count}`);
+
+  // Handle email events
+  if (event === "email.received" || event === "email.sent") {
+    const { email } = req.body;
+    console.log(`  From: ${email.from_address}`);
+    console.log(`  Subject: ${email.subject}`);
+    console.log(`  Snippet: ${email.snippet}`);
+    console.log(`  Trusted: ${email.is_trusted_sender}`);
+    console.log(`  Attachments: ${email.attachment_count}`);
+  }
+
+  // Handle calendar reminders
+  if (event === "calendar.event_reminder") {
+    const { calendar_event } = req.body;
+    console.log(`  Event: ${calendar_event.title}`);
+    console.log(`  Starts: ${calendar_event.start_time}`);
+  }
+
+  // Handle scheduled email events
+  if (event === "scheduled_email.sent" || event === "scheduled_email.failed") {
+    const { scheduled_email } = req.body;
+    console.log(`  Scheduled ID: ${scheduled_email.id}`);
+    console.log(`  Status: ${scheduled_email.status}`);
+  }
+
+  // Handle document events
+  if (event === "document.created") {
+    const { document } = req.body;
+    console.log(`  Collection: ${document.collection}`);
+    console.log(`  Document ID: ${document.id}`);
+  }
 
   // Process the event...
   // Use the email.id with the REST API or MCP to get the full email body if needed.
